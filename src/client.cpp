@@ -15,6 +15,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <stdexcept>
+#include <cstdlib>
 
 #include "utils.h"
 #include "common.pb.h"
@@ -238,11 +240,11 @@ static void processCommand(const std::string& rawLine) {
     // /help
     if (line == "/help") {
         addMsg("+--- Commands --------------------------------------------------+", 1);
-        addMsg("|  <message>                 broadcast to all                  |", 5);
-        addMsg("|  /dm <user> <message>      send a direct message             |", 5);
+        addMsg("|  <message>                 broadcast to all                   |", 5);
+        addMsg("|  /dm <user> <message>      send a direct message              |", 5);
         addMsg("|  /list                     list connected users               |", 5);
         addMsg("|  /info <user>              get info about a user              |", 5);
-        addMsg("|  /status active|busy|inactive  change your status            |", 5);
+        addMsg("|  /status active|busy|inactive  change your status             |", 5);
         addMsg("|  /help                     show this help                     |", 5);
         addMsg("|  /quit                     exit                               |", 5);
         addMsg("+---------------------------------------------------------------+", 1);

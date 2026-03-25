@@ -29,8 +29,8 @@ ifeq ($(UNAME), Darwin)
     PROTOC := $(BREW_PREFIX)/bin/protoc
 else
     # Linux / WSL
-    NCURSES_FLAGS := -lncurses
-    PROTOC        := protoc
+    NCURSES_LIBS := -lncurses
+    PROTOC       := protoc
 endif
 
 # ── Proto sources ─────────────────────────────────────────────
