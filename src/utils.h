@@ -3,9 +3,19 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+
+#ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #ifndef _SSIZE_T_DEFINED
+        typedef intptr_t ssize_t;
+        #define _SSIZE_T_DEFINED
+    #endif
+#else
+    #include <sys/socket.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+#endif
 
 // ── Message type identifiers
 enum MessageType : uint8_t {

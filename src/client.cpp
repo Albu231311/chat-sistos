@@ -11,10 +11,21 @@
 #include <csignal>
 #include <ctime>
 #include <sstream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+
+#ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #pragma comment(lib, "ws2_32.lib")
+    typedef int socklen_t;
+    #define close closesocket
+    #define SHUT_RDWR SD_BOTH
+#else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+#endif
+
 #include <stdexcept>
 #include <cstdlib>
 
@@ -451,8 +462,18 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+#ifndef _WIN32
     signal(SIGPIPE, SIG_IGN);
+#endif
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+#ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "WSAStartup failed.\n";
+        return 1;
+    }
+#endif
 
     // Connect to server
     gSockFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -574,5 +595,8 @@ int main(int argc, char* argv[]) {
     recvThr.join();
     endwin();
     google::protobuf::ShutdownProtobufLibrary();
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return 0;
 }

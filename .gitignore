@@ -3,3 +3,4 @@ gen
 server
 client
 *.o
+build

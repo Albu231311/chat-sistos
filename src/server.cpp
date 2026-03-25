@@ -7,10 +7,19 @@
 #include <atomic>
 #include <cstring>
 #include <csignal>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+
+#ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #pragma comment(lib, "ws2_32.lib")
+    typedef int socklen_t;
+    #define close closesocket
+#else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+#endif
 
 #include "utils.h"
 #include "common.pb.h"
@@ -335,14 +344,24 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+#ifndef _WIN32
     signal(SIGPIPE, SIG_IGN);
+#endif
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+#ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "WSAStartup failed.\n";
+        return 1;
+    }
+#endif
 
     int srvFd = socket(AF_INET, SOCK_STREAM, 0);
     if (srvFd < 0) { perror("socket"); return 1; }
 
     int opt = 1;
-    setsockopt(srvFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    setsockopt(srvFd, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&opt), sizeof(opt));
 
     sockaddr_in addr{};
     addr.sin_family      = AF_INET;
@@ -378,5 +397,8 @@ int main(int argc, char* argv[]) {
 
     close(srvFd);
     google::protobuf::ShutdownProtobufLibrary();
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return 0;
 }
