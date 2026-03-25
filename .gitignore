@@ -1,0 +1,5 @@
+gen
+*.pb.*
+server
+client
+*.o
